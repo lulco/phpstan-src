@@ -14,18 +14,18 @@
 		"hoa/compiler": "3.17.08.08",
 		"hoa/exception": "^1.0",
 		"hoa/regex": "1.17.01.13",
-		"jetbrains/phpstorm-stubs": "dev-master#0b9854c8ba932966f3cb1469a2d18ab9249272b9",
+		"jetbrains/phpstorm-stubs": "dev-master#077d371b23d38d7f6f039994bfb03732d7965fbc",
 		"nette/bootstrap": "^3.0",
 		"nette/di": "^3.0.11",
 		"nette/finder": "^2.5",
 		"nette/neon": "^3.3.1",
 		"nette/schema": "^1.2.2",
 		"nette/utils": "^3.2.5",
-		"nikic/php-parser": "^4.16",
+		"nikic/php-parser": "^4.15.4",
 		"ondram/ci-detector": "^3.4.0",
-		"ondrejmirtes/better-reflection": "6.11.0.1",
-		"phpstan/php-8-stubs": "0.3.70",
-		"phpstan/phpdoc-parser": "1.23.0",
+		"ondrejmirtes/better-reflection": "6.8.0.1",
+		"phpstan/php-8-stubs": "0.3.60",
+		"phpstan/phpdoc-parser": "1.20.4",
 		"react/async": "^3",
 		"react/child-process": "^0.6.4",
 		"react/dns": "^1.10",
@@ -42,7 +42,6 @@
 		"symfony/polyfill-php73": "^1.23",
 		"symfony/polyfill-php74": "^1.23",
 		"symfony/polyfill-php80": "^1.23",
-		"symfony/polyfill-php81": "^1.27",
 		"symfony/process": "^5.4.3",
 		"symfony/service-contracts": "^2.5.0",
 		"symfony/string": "^5.4.3"
@@ -60,7 +59,7 @@
 		"phpstan/phpstan-phpunit": "^1.0",
 		"phpstan/phpstan-strict-rules": "^1.5.1",
 		"phpunit/phpunit": "^9.5.4",
-		"rector/rector": "^0.17"
+		"rector/rector": "^0.15"
 	},
 	"config": {
 		"platform": {
@@ -97,6 +96,7 @@
 				"patches/SessionHandler.patch"
 			],
 			"rector/rector": [
+				"patches/BooleanTypeMapper.patch",
 				"patches/NameNodeMapper.patch"
 			]
 		}
