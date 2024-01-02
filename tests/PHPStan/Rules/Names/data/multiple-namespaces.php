@@ -2,32 +2,32 @@
 
 namespace FirstNamespace
 {
-    use SomeOtherNamespace\SimpleUses;
+	use SomeOtherNamespace\SimpleUses;
 
-    final class MultipleNamespaces
-    {
-    }
+	final class MultipleNamespaces
+	{
+	}
 }
 
 namespace SecondNamespace
 {
-    use SomeOtherNamespace\SimpleUses;
+	use SomeOtherNamespace\SimpleUses;
 
-    final class MultipleNamespaces
-    {
-    }
+	final class MultipleNamespaces
+	{
+	}
 }
 
 
 namespace FirstNamespace
 {
-    trait MultipleNamespaces
-    {
-    }
+	trait MultipleNamespaces
+	{
+	}
 }
 
 namespace {
-    final class MultipleNamespaces
-    {
-    }
+	final class MultipleNamespaces
+	{
+	}
 }

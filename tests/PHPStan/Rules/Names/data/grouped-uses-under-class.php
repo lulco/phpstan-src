@@ -7,6 +7,6 @@ final class GroupedUsesUnderClass
 }
 
 use SomeOtherNamespace\{
-    SimpleUses,
-    UsesUnderClass as GroupedUsesUnderClass,
+	SimpleUses,
+	UsesUnderClass as GroupedUsesUnderClass,
 };
