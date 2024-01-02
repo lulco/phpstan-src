@@ -36,7 +36,7 @@ final class UsedNamesRule implements Rule
         $errors = [];
         foreach ($node->getNodes() as $oneNode) {
             if ($oneNode instanceof Namespace_) {
-                $namespaceName = $oneNode->name ? $oneNode->name->toString() : '';
+                $namespaceName = $oneNode->name !== null ? $oneNode->name->toString() : '';
                 foreach ($oneNode->stmts as $stmt) {
                     $error = $this->findErrorForNode($stmt, $namespaceName, $usedNames);
                     if ($error !== null) {
