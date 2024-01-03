@@ -6,7 +6,11 @@ final class GroupedUsesUnderClass
 {
 }
 
+final class FooBar
+{
+}
+
 use SomeOtherNamespace\{
-	SimpleUses,
+	FooBar,
 	UsesUnderClass as GroupedUsesUnderClass,
 };

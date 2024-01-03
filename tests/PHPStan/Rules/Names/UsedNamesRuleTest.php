@@ -50,8 +50,12 @@ final class UsedNamesRuleTest extends RuleTestCase
 	{
 		$this->analyse([__DIR__ . '/data/grouped-uses-under-class.php'], [
 			[
+				'Cannot use SomeOtherNamespace\FooBar as FooBar because the name is already in use.',
+				14,
+			],
+			[
 				'Cannot use SomeOtherNamespace\UsesUnderClass as GroupedUsesUnderClass because the name is already in use.',
-				11,
+				15,
 			],
 		]);
 	}
@@ -78,6 +82,11 @@ final class UsedNamesRuleTest extends RuleTestCase
 				24,
 			],
 		]);
+	}
+
+	public function testIgnoreUseFunction(): void
+	{
+		$this->analyse([__DIR__ . '/data/ignore-use-function-and-constant.php'], []);
 	}
 
 }

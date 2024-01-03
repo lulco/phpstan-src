@@ -10,11 +10,13 @@ use PhpParser\Node\Stmt\Interface_;
 use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\Stmt\Trait_;
 use PhpParser\Node\Stmt\Use_;
+use PhpParser\Node\Stmt\UseUse;
 use PHPStan\Analyser\Scope;
 use PHPStan\Node\FileNode;
 use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleError;
 use PHPStan\Rules\RuleErrorBuilder;
+use function array_merge;
 use function in_array;
 use function sprintf;
 use function strtolower;
@@ -41,72 +43,41 @@ final class UsedNamesRule implements Rule
 			if ($oneNode instanceof Namespace_) {
 				$namespaceName = $oneNode->name !== null ? $oneNode->name->toString() : '';
 				foreach ($oneNode->stmts as $stmt) {
-					$error = $this->findErrorForNode($stmt, $namespaceName, $usedNames);
-					if ($error === null) {
-						continue;
-					}
-
-					$errors[] = $error;
+					$errors[] = $this->findErrorsForNode($stmt, $namespaceName, $usedNames);
 				}
 			}
 
-			$error = $this->findErrorForNode($oneNode, '', $usedNames);
-			if ($error === null) {
-				continue;
-			}
-
-			$errors[] = $error;
+			$errors[] = $this->findErrorsForNode($oneNode, '', $usedNames);
 		}
 
-		return $errors;
+		return array_merge(...$errors);
 	}
 
 	/**
 	 * @param array<string, string[]> $usedNames
+	 * @return RuleError[]
 	 */
-	private function findErrorForNode(Node $node, string $namespace, array &$usedNames): ?RuleError
+	private function findErrorsForNode(Node $node, string $namespace, array &$usedNames): array
 	{
 		$lowerNamespace = strtolower($namespace);
 		if ($node instanceof Use_) {
-			foreach ($node->uses as $use) {
-				$useAlias = $use->getAlias()->toLowerString();
-				if (in_array($useAlias, $usedNames[$lowerNamespace] ?? [], true)) {
-					return RuleErrorBuilder::message(sprintf(
-						'Cannot use %s as %s because the name is already in use.',
-						$use->name->toString(),
-						$use->getAlias()->toString(),
-					))
-						->line($use->getLine())
-						->nonIgnorable()
-						->build();
-				}
-				$usedNames[$lowerNamespace][] = $useAlias;
+			if ($this->shouldBeIgnored($node)) {
+				return [];
 			}
-			return null;
+			return $this->findErrorsInUses($node->uses, '', $lowerNamespace, $usedNames);
 		}
 
 		if ($node instanceof GroupUse) {
-			$useGroupPrefix = $node->prefix->toString();
-			foreach ($node->uses as $use) {
-				$useAlias = $use->getAlias()->toLowerString();
-				if (in_array($useAlias, $usedNames[$lowerNamespace] ?? [], true)) {
-					return RuleErrorBuilder::message(sprintf(
-						'Cannot use %s as %s because the name is already in use.',
-						$useGroupPrefix . '\\' . $use->name->toString(),
-						$use->getAlias()->toString(),
-					))
-						->line($use->getLine())
-						->nonIgnorable()
-						->build();
-				}
-				$usedNames[$lowerNamespace][] = $useAlias;
+			if ($this->shouldBeIgnored($node)) {
+				return [];
 			}
-			return null;
+			$useGroupPrefix = $node->prefix->toString();
+			return $this->findErrorsInUses($node->uses, $useGroupPrefix, $lowerNamespace, $usedNames);
 		}
 
 		if ($node instanceof ClassLike) {
 			if ($node->name === null) {
-				return null;
+				return [];
 			}
 			$type = 'class';
 			if ($node instanceof Interface_) {
@@ -118,20 +89,56 @@ final class UsedNamesRule implements Rule
 			}
 			$name = $node->name->toLowerString();
 			if (in_array($name, $usedNames[$lowerNamespace] ?? [], true)) {
-				return RuleErrorBuilder::message(sprintf(
-					'Cannot declare %s %s because the name is already in use.',
-					$type,
-					($namespace !== '' ? $namespace . '\\' . $node->name->toString() : $node->name->toString()),
-				))
-					->line($node->getLine())
-					->nonIgnorable()
-					->build();
+				return [
+					RuleErrorBuilder::message(sprintf(
+						'Cannot declare %s %s because the name is already in use.',
+						$type,
+						$namespace !== '' ? $namespace . '\\' . $node->name->toString() : $node->name->toString(),
+					))
+						->line($node->getLine())
+						->nonIgnorable()
+						->build(),
+				];
 			}
 			$usedNames[$lowerNamespace][] = $name;
-			return null;
+			return [];
 		}
 
-		return null;
+		return [];
+	}
+
+	/**
+	 * @param UseUse[] $uses
+	 * @param array<string, string[]> $usedNames
+	 * @return RuleError[]
+	 */
+	private function findErrorsInUses(array $uses, string $useGroupPrefix, string $lowerNamespace, array &$usedNames): array
+	{
+		$errors = [];
+		foreach ($uses as $use) {
+			if ($this->shouldBeIgnored($use)) {
+				continue;
+			}
+			$useAlias = $use->getAlias()->toLowerString();
+			if (in_array($useAlias, $usedNames[$lowerNamespace] ?? [], true)) {
+				$errors[] = RuleErrorBuilder::message(sprintf(
+					'Cannot use %s as %s because the name is already in use.',
+					$useGroupPrefix !== '' ? $useGroupPrefix . '\\' . $use->name->toString() : $use->name->toString(),
+					$use->getAlias()->toString(),
+				))
+					->line($use->getLine())
+					->nonIgnorable()
+					->build();
+				continue;
+			}
+			$usedNames[$lowerNamespace][] = $useAlias;
+		}
+		return $errors;
+	}
+
+	private function shouldBeIgnored(Use_|GroupUse|UseUse $use): bool
+	{
+		return in_array($use->type, [Use_::TYPE_FUNCTION, Use_::TYPE_CONSTANT], true);
 	}
 
 }
