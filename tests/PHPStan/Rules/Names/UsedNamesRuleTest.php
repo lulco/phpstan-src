@@ -16,7 +16,7 @@ final class UsedNamesRuleTest extends RuleTestCase
 		return new UsedNamesRule();
 	}
 
-	public function testRule(): void
+	public function testSimpleUses(): void
 	{
 		$this->analyse([__DIR__ . '/data/simple-uses.php'], [
 			[
@@ -24,28 +24,40 @@ final class UsedNamesRuleTest extends RuleTestCase
 				7,
 			],
 		]);
+	}
 
+	public function testGroupedUses(): void
+	{
 		$this->analyse([__DIR__ . '/data/grouped-uses.php'], [
 			[
 				'Cannot declare interface SomeNamespace\GroupedUses because the name is already in use.',
 				10,
 			],
 		]);
+	}
 
+	public function testSimpleUsesUnderClass(): void
+	{
 		$this->analyse([__DIR__ . '/data/simple-uses-under-class.php'], [
 			[
 				'Cannot use SomeOtherNamespace\UsesUnderClass as SimpleUsesUnderClass because the name is already in use.',
 				9,
 			],
 		]);
+	}
 
+	public function testGroupedUsesUnderClass(): void
+	{
 		$this->analyse([__DIR__ . '/data/grouped-uses-under-class.php'], [
 			[
 				'Cannot use SomeOtherNamespace\UsesUnderClass as GroupedUsesUnderClass because the name is already in use.',
 				11,
 			],
 		]);
+	}
 
+	public function testNoNamespace(): void
+	{
 		$this->analyse([__DIR__ . '/data/no-namespace.php'], [
 			[
 				'Cannot declare class NoNamespace because the name is already in use.',
@@ -56,7 +68,10 @@ final class UsedNamesRuleTest extends RuleTestCase
 				9,
 			],
 		]);
+	}
 
+	public function testMultipleNamespaces(): void
+	{
 		$this->analyse([__DIR__ . '/data/multiple-namespaces.php'], [
 			[
 				'Cannot declare trait FirstNamespace\MultipleNamespaces because the name is already in use.',

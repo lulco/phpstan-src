@@ -16,6 +16,7 @@ use PHPStan\Rules\Rule;
 use PHPStan\Rules\RuleError;
 use PHPStan\Rules\RuleErrorBuilder;
 use function in_array;
+use function sprintf;
 use function strtolower;
 
 /**
@@ -70,7 +71,14 @@ final class UsedNamesRule implements Rule
 			foreach ($node->uses as $use) {
 				$useAlias = $use->getAlias()->toLowerString();
 				if (in_array($useAlias, $usedNames[$lowerNamespace] ?? [], true)) {
-					return RuleErrorBuilder::message('Cannot use ' . $use->name->toString() . ' as ' . $use->getAlias()->toString() . ' because the name is already in use.')->line($use->getStartLine())->build();
+					return RuleErrorBuilder::message(sprintf(
+						'Cannot use %s as %s because the name is already in use.',
+						$use->name->toString(),
+						$use->getAlias()->toString(),
+					))
+						->line($use->getLine())
+						->nonIgnorable()
+						->build();
 				}
 				$usedNames[$lowerNamespace][] = $useAlias;
 			}
@@ -82,7 +90,14 @@ final class UsedNamesRule implements Rule
 			foreach ($node->uses as $use) {
 				$useAlias = $use->getAlias()->toLowerString();
 				if (in_array($useAlias, $usedNames[$lowerNamespace] ?? [], true)) {
-					return RuleErrorBuilder::message('Cannot use ' . $useGroupPrefix . '\\' . $use->name->toString() . ' as ' . $use->getAlias()->toString() . ' because the name is already in use.')->line($use->getStartLine())->build();
+					return RuleErrorBuilder::message(sprintf(
+						'Cannot use %s as %s because the name is already in use.',
+						$useGroupPrefix . '\\' . $use->name->toString(),
+						$use->getAlias()->toString(),
+					))
+						->line($use->getLine())
+						->nonIgnorable()
+						->build();
 				}
 				$usedNames[$lowerNamespace][] = $useAlias;
 			}
@@ -103,7 +118,14 @@ final class UsedNamesRule implements Rule
 			}
 			$name = $node->name->toLowerString();
 			if (in_array($name, $usedNames[$lowerNamespace] ?? [], true)) {
-				return RuleErrorBuilder::message('Cannot declare ' . $type . ' ' . ($namespace !== '' ? $namespace . '\\' . $node->name->toString() : $node->name->toString()) . ' because the name is already in use.')->line($node->getStartLine())->build();
+				return RuleErrorBuilder::message(sprintf(
+					'Cannot declare %s %s because the name is already in use.',
+					$type,
+					($namespace !== '' ? $namespace . '\\' . $node->name->toString() : $node->name->toString()),
+				))
+					->line($node->getLine())
+					->nonIgnorable()
+					->build();
 			}
 			$usedNames[$lowerNamespace][] = $name;
 			return null;
